@@ -218,7 +218,7 @@ class Field(listener: ActionListener) {
             for (y in 0 until columns) {
                 val cell = getCellFromField(x, y)
                 if (cell?.getChecker()?.getColorOfChecker() == Colors.BLACK) counterForBlack++
-                else counterForWhite++
+                if (cell?.getChecker()?.getColorOfChecker() == Colors.WHITE) counterForWhite++
             }
         }
         if (counterForBlack == 0 || counterForWhite == 0) flag = true
