@@ -5,4 +5,6 @@
     <string name="start_button">Start</string>
     <string name="rules_text">The opponent with the darker pieces moves first. Pieces may only move one diagonal space forward (towards their opponents pieces) in the beginning of the game. Pieces must stay on the dark squares. To capture an opposing piece, "jump" over it by moving two diagonal spaces in the direction of the opposing piece.</string>
     <string name="back_button">Back</string>
+    <string name="congrats">Congratulations! Game was finished!</string>
+    <string name="back_to_menu">Back to menu</string>
 </resources>

@@ -9,9 +9,18 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.EnglishCheckers">
-        <activity android:name=".StartField"></activity>
-        <activity android:name=".Rules" />
-        <activity android:name=".MainActivity">
+        <activity
+            android:name=".FinishedGame"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".StartField"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Rules"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".MainActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

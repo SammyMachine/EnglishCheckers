@@ -209,6 +209,21 @@ class Field(listener: ActionListener) {
         }
         return possibleSteps
     }
+
+    fun checkForGameFinished(): Boolean {
+        var flag = false
+        var counterForBlack = 0
+        var counterForWhite = 0
+        for (x in 0 until rows) {
+            for (y in 0 until columns) {
+                val cell = getCellFromField(x, y)
+                if (cell?.getChecker()?.getColorOfChecker() == Colors.BLACK) counterForBlack++
+                else counterForWhite++
+            }
+        }
+        if (counterForBlack == 0 || counterForWhite == 0) flag = true
+        return flag
+    }
 }
 
 data class Cell(var posX: Int, var posY: Int, var checkerForCell: Checker?) {

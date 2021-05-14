@@ -4,6 +4,7 @@ import Cell
 import Checker
 import Colors
 import Field
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
@@ -39,6 +40,11 @@ class StartField : AppCompatActivity(), Field.ActionListener {
         moveFlag = true
         viewNow = mutableListOf()
 
+    }
+
+    fun moveToFinish() {
+        val startFieldIntent = Intent(this, FinishedGame::class.java)
+        startActivity(startFieldIntent)
     }
 
     private fun findTag(zxc: ViewGroup, tag: Any): View? {
@@ -112,6 +118,10 @@ class StartField : AppCompatActivity(), Field.ActionListener {
             }
         }
         return flag
+    }
+
+    fun gameWasFinished() {
+
     }
 
     fun becomeQueen(cell: Cell) {
@@ -198,37 +208,42 @@ class StartField : AppCompatActivity(), Field.ActionListener {
             viewNow.clear()
         }
         if (clickCounter == 0) {
-            val cell = startField.getCellFromField(posX, posY)
-            if (cell?.getChecker() != null) {
-                if (flagToPickAnotherColor(cell, moveFlag)) {
-                    val requiredSteps = startField.requiredSteps(moveFlag)
-                    val possibleSteps = startField.possibleSteps(cell, moveFlag)
-                    if (requiredSteps.isNotEmpty()) {
-                        potentialSteps = requiredSteps
-                        for ((key, list) in potentialSteps) {
-                            val column1 = findTag(table, String.valueOf(key?.getY()))
-                            Objects.requireNonNull(column1)?.findViewWithTag<LinearLayout>(String.valueOf(column1?.getX()))?.setBackgroundColor(ContextCompat.getColor(this, R.color.positionAtTheMomentColor))
-                            for (i in list.indices) {
-                                val column = findTag(table, String.valueOf(list[i]?.getY()))
-                                Objects.requireNonNull(column)?.findViewWithTag<LinearLayout>(String.valueOf(list[i]?.getX()))?.setBackgroundColor(ContextCompat.getColor(this, R.color.possibleStepColor))
+            if (!startField.checkForGameFinished()) {
+                val cell = startField.getCellFromField(posX, posY)
+                if (cell?.getChecker() != null) {
+                    if (flagToPickAnotherColor(cell, moveFlag)) {
+                        val requiredSteps = startField.requiredSteps(moveFlag)
+                        val possibleSteps = startField.possibleSteps(cell, moveFlag)
+                        if (requiredSteps.isNotEmpty()) {
+                            potentialSteps = requiredSteps
+                            for ((key, list) in potentialSteps) {
+                                val column1 = findTag(table, String.valueOf(key?.getY()))
+                                Objects.requireNonNull(column1)?.findViewWithTag<LinearLayout>(String.valueOf(column1?.getX()))?.setBackgroundColor(ContextCompat.getColor(this, R.color.positionAtTheMomentColor))
+                                for (i in list.indices) {
+                                    val column = findTag(table, String.valueOf(list[i]?.getY()))
+                                    Objects.requireNonNull(column)?.findViewWithTag<LinearLayout>(String.valueOf(list[i]?.getX()))?.setBackgroundColor(ContextCompat.getColor(this, R.color.possibleStepColor))
+                                }
                             }
+                            selectedCell = cell
+                            if (flagToPickNonEater(selectedCell, requiredSteps)) clickCounter++
+                        } else {
+                            potentialSteps[cell] = possibleSteps
+                            if (cell.getChecker() != null) {
+                                view.setBackgroundColor(ContextCompat.getColor(this, R.color.positionAtTheMomentColor));
+                                viewNow.add(view)
+                            }
+                            for (i in potentialSteps[cell]!!.indices) {
+                                val column = findTag(table, String.valueOf(potentialSteps[cell]?.get(i)?.getY()))
+                                Objects.requireNonNull(column)?.findViewWithTag<LinearLayout>(String.valueOf(potentialSteps[cell]?.get(i)?.getX()))?.setBackgroundColor(ContextCompat.getColor(this, R.color.possibleStepColor))
+                            }
+                            selectedCell = cell
+                            clickCounter++
                         }
-                        selectedCell = cell
-                        if (flagToPickNonEater(selectedCell, requiredSteps)) clickCounter++
-                    } else {
-                        potentialSteps[cell] = possibleSteps
-                        if (cell.getChecker() != null) {
-                            view.setBackgroundColor(ContextCompat.getColor(this, R.color.positionAtTheMomentColor));
-                            viewNow.add(view)
-                        }
-                        for (i in potentialSteps[cell]!!.indices) {
-                            val column = findTag(table, String.valueOf(potentialSteps[cell]?.get(i)?.getY()))
-                            Objects.requireNonNull(column)?.findViewWithTag<LinearLayout>(String.valueOf(potentialSteps[cell]?.get(i)?.getX()))?.setBackgroundColor(ContextCompat.getColor(this, R.color.possibleStepColor))
-                        }
-                        selectedCell = cell
-                        clickCounter++
                     }
                 }
+            }
+            else {
+                moveToFinish()
             }
         }
     }
