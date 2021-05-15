@@ -1,25 +1,37 @@
-import android.provider.CalendarContract
-import com.example.englishcheckers.R
 
-class Field(listener: ActionListener) {
+import android.view.View
+import android.widget.LinearLayout
+import com.example.englishcheckers.R
+import kotlin.properties.Delegates
+
+class Field(listener: ActionListener?) {
 
     lateinit var checkersField: Array<Array<Cell?>?>
     private val columns = 8
     private val rows = 8
-    private var actionListener: ActionListener = listener
+    private var actionListener: ActionListener? = listener
+    private lateinit var selectedCell: Cell
+    private var clickCounter = 0
+    private var potentialSteps = mutableMapOf<Cell?, MutableList<Cell?>>()
+    private var moveFlag by Delegates.notNull<Boolean>()
+    private lateinit var viewNow: MutableList<Pair<Int, Int>>
 
     fun actionListener(actionListener: ActionListener) {
         this.actionListener = actionListener
-    }
-
-    fun getActionListener(): ActionListener {
-        return actionListener
     }
 
     interface ActionListener {
         fun checkerAdded(position: Cell)
         fun checkerMoved(start: Cell, end: Cell)
         fun checkerWasEaten(eatenCell: Cell)
+        fun boardClear(potentialSteps: Map<Cell?, List<Cell?>>, views: List<View?>)
+        fun becomeQueen(cell: Cell)
+        fun setColorOfPotentialCell(x: Int, y: Int, color: Colors)
+        fun setColorOfChosenCell(x: Int, y: Int, color: Colors): Pair<Int, Int>
+        fun viewClearing(viewNow: MutableList<View?>)
+        fun addingToView(view: View)
+        fun convertCoordinatesToViews(viewNow: MutableList<Pair<Int, Int>>): MutableList<View?>
+        fun getCheckerLayout(cell: Cell): LinearLayout?
     }
 
 
@@ -41,7 +53,7 @@ class Field(listener: ActionListener) {
                 if ((x + y) % 2 != 0) {
                     val checker = Checker(Colors.WHITE, false)
                     checkersField.get(x)?.get(y)?.setChecker(checker)
-                    actionListener.checkerAdded(Cell(x, y, checker))
+                    actionListener?.checkerAdded(Cell(x, y, checker))
 
                 }
             }
@@ -49,9 +61,36 @@ class Field(listener: ActionListener) {
                 if ((y + x) % 2 != 0) {
                     val checker = Checker(Colors.BLACK, false)
                     checkersField.get(x)?.get(y)?.setChecker(checker)
-                    actionListener.checkerAdded(Cell(x, y, checker))
+                    actionListener?.checkerAdded(Cell(x, y, checker))
                 }
         }
+    }
+
+    fun flagToMove(selectedCell: Cell, cell: Cell, possibleSteps: Map<Cell?, List<Cell?>>): Boolean
+            = possibleSteps[selectedCell]?.contains(cell)!!
+
+    fun flagToPickAnotherColor(cell: Cell, moveFlag: Boolean): Boolean {
+        return if (moveFlag) cell.getChecker()?.getColorOfChecker() == Colors.BLACK
+        else cell.getChecker()?.getColorOfChecker() == Colors.WHITE
+    }
+
+    fun flagToPickNonEater(selectedCell: Cell, requiredSteps: Map<Cell?, List<Cell?>>): Boolean {
+        var flag = false
+        for (i in requiredSteps.keys) {
+            if (selectedCell == i) flag = true
+        }
+        return flag
+    }
+
+    fun multiEatSituation(cell: Cell?, requiredSteps: Map<Cell?, List<Cell?>>): Boolean {
+        var flag = false
+        for ((key, value) in requiredSteps) {
+            if (selectedCell == key && cell in value) {
+                flag = true
+                break
+            }
+        }
+        return flag
     }
 
     fun cellInStartField(posX: Int, posY: Int): Boolean = (posX in 0..7 && posY in 0..7)
@@ -63,6 +102,151 @@ class Field(listener: ActionListener) {
     }
 
     //moveFlag: true when BlackPlayer move; false when WhitePlayer move
+
+    fun startGame(x: Int, y: Int): String {
+        var outputToOnClick = "nothing"
+        if (clickCounter == 1) {
+            val cell1 = this.getCellFromField(x, y)
+            if (cell1!!.getChecker() != null) {
+                if (cell1.getChecker()?.getColorOfChecker() == selectedCell.getChecker()
+                        ?.getColorOfChecker()
+                )
+                    clickCounter = 0
+            } else {
+                if (flagToMove(selectedCell, cell1, potentialSteps)) {
+                    if (selectedCell in potentialSteps.keys)
+                        if (((selectedCell.getX() - (cell1.getX())) == 2 || (selectedCell.getX() - (cell1.getX())) == -2)
+                            && ((selectedCell.getY() - (cell1.getY())) == 2 || (selectedCell.getY() - (cell1.getY())) == -2)
+                        ) {
+                            val entry = mutableMapOf<Cell?, MutableList<Cell?>>()
+                            entry[selectedCell] = potentialSteps[selectedCell]!!
+                            if (multiEatSituation(cell1, potentialSteps)) {
+                                this.getCellFromField(x, y)
+                                    ?.setChecker(selectedCell.getChecker())
+                                this.getCellFromField(
+                                    selectedCell.getX(),
+                                    selectedCell.getY()
+                                )?.setChecker(null)
+                                actionListener?.checkerMoved(selectedCell, cell1)
+                                actionListener?.checkerWasEaten(
+                                    this.getCellFromField(
+                                        (cell1.getX() + selectedCell.getX()) / 2,
+                                        (cell1.getY() + selectedCell.getY()) / 2
+                                    )!!
+                                )
+                                this.getCellFromField(
+                                    (cell1.getX() + selectedCell.getX()) / 2,
+                                    (cell1.getY() + selectedCell.getY()) / 2
+                                )!!.setChecker(null)
+                                if (this.checkForEatMore(cell1, entry).isNotEmpty()) {
+                                    clickCounter = 0
+                                } else {
+                                    if (cell1.getChecker()?.getColorOfChecker() == Colors.BLACK) {
+                                        if (cell1.getY() == 0) {
+                                            actionListener?.becomeQueen(cell1)
+                                            cell1.setChecker(
+                                                Checker(
+                                                    cell1.getChecker()!!.getColorOfChecker(), true
+                                                )
+                                            )
+                                        }
+                                    } else {
+                                        if (cell1.getY() == 7) {
+                                            actionListener?.becomeQueen(cell1)
+                                            cell1.setChecker(
+                                                Checker(
+                                                    cell1.getChecker()!!.getColorOfChecker(), true
+                                                )
+                                            )
+                                        }
+                                    }
+                                    clickCounter = 0
+                                    moveFlag = !moveFlag
+                                }
+                            } else {
+                                if (this.checkForEatMore(cell1, entry).isNotEmpty()) {
+                                    clickCounter = 0
+                                } else {
+                                    clickCounter = 0
+                                    moveFlag = !moveFlag
+                                }
+                            }
+                        } else {
+                            this.getCellFromField(x, y)
+                                ?.setChecker(selectedCell.getChecker())
+                            this.getCellFromField(selectedCell.getX(), selectedCell.getY())
+                                ?.setChecker(null)
+                            actionListener?.checkerMoved(selectedCell, cell1)
+                            if (cell1.getChecker()?.getColorOfChecker() == Colors.BLACK) {
+                                if (cell1.getY() == 0) {
+                                    actionListener?.becomeQueen(cell1)
+                                    cell1.setChecker(
+                                        Checker(
+                                            cell1.getChecker()!!.getColorOfChecker(), true
+                                        )
+                                    )
+                                }
+                            } else {
+                                if (cell1.getY() == 7) {
+                                    actionListener?.becomeQueen(cell1)
+                                    cell1.setChecker(
+                                        Checker(
+                                            cell1.getChecker()!!.getColorOfChecker(), true
+                                        )
+                                    )
+                                }
+                            }
+                            moveFlag = !moveFlag
+                            clickCounter = 0
+                        }
+                }
+            }
+            actionListener?.boardClear(potentialSteps, actionListener?.convertCoordinatesToViews(viewNow)!!)
+            actionListener?.viewClearing(actionListener?.convertCoordinatesToViews(viewNow)!!)
+        }
+        if (clickCounter == 0) {
+            if (!this.checkForGameFinished().first) {
+                val cell = this.getCellFromField(x, y)
+                if (cell?.getChecker() != null) {
+                    if (flagToPickAnotherColor(cell, moveFlag)) {
+                        val requiredSteps = this.requiredSteps(moveFlag)
+                        val possibleSteps = this.possibleSteps(moveFlag)
+                        if (requiredSteps.isNotEmpty()) {
+                            potentialSteps = requiredSteps
+                            for ((key, list) in potentialSteps) {
+                                actionListener?.setColorOfChosenCell(x, y, Colors.POSITION_AT_THE_MOMENT)
+                                actionListener?.addingToView(actionListener?.getCheckerLayout(key!!) as View)
+                                for (i in list.indices) {
+                                    actionListener?.setColorOfPotentialCell(list[i]!!.getX(), list[i]!!.getY(),Colors.POSITION_AT_THE_MOMENT)
+                                }
+                            }
+                            selectedCell = cell
+                            if (flagToPickNonEater(selectedCell, requiredSteps)) clickCounter++
+                        } else if (possibleSteps.isNotEmpty()) {
+                            potentialSteps[cell] = possibleSteps[cell]!!
+                            if (cell.getChecker() != null) {
+                                actionListener?.addingToView(actionListener?.getCheckerLayout(cell) as View)
+                            }
+                            for (i in potentialSteps[cell]!!.indices) {
+                                actionListener?.setColorOfPotentialCell(potentialSteps[cell]?.get(i)!!.getX(), potentialSteps[cell]?.get(i)!!.getY(), Colors.POSSIBLE_STEP_COLOR)
+                            }
+                            selectedCell = cell
+                            clickCounter++
+                        } else {
+                            outputToOnClick = "draw"
+                        }
+                    }
+                }
+            } else {
+                outputToOnClick = if (this.checkForGameFinished().second) {
+                    "winBlack"
+                } else {
+                    "winWhite"
+                }
+            }
+        }
+        return outputToOnClick
+    }
 
     fun requiredSteps(moveFlag: Boolean): MutableMap<Cell?, MutableList<Cell?>> {
         val varyList = listOf(Pair(-1, -1), Pair(-1, 1), Pair(1, -1), Pair(1, 1))
@@ -382,6 +566,8 @@ data class Cell(var posX: Int, var posY: Int, var checkerForCell: Checker?) {
 enum class Colors(val rgb: Int) {
     WHITE(R.color.white),
     BLACK(R.color.black),
+    POSITION_AT_THE_MOMENT(R.color.positionAtTheMomentColor),
+    POSSIBLE_STEP_COLOR(R.color.possibleStepColor)
 }
 
 data class Checker(var color: Colors, var queen: Boolean) {
