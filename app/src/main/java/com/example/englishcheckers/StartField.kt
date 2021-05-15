@@ -316,19 +316,15 @@ class StartField : AppCompatActivity(), Field.ActionListener {
                             selectedCell = cell
                             clickCounter++
                         } else {
-                            if (startField.checkForGameFinished().third) {
-                                moveToDraw()
-                            }
+                            moveToDraw()
                         }
                     }
                 }
             } else {
-                if (!startField.checkForGameFinished().third) {
-                    if (startField.checkForGameFinished().second) {
-                        moveToFinishBlack()
-                    } else {
-                        moveToFinishWhite()
-                    }
+                if (startField.checkForGameFinished().second) {
+                    moveToFinishBlack()
+                } else {
+                    moveToFinishWhite()
                 }
             }
         }

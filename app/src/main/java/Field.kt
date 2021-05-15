@@ -314,10 +314,9 @@ class Field(listener: ActionListener) {
         return possibleSteps
     }
 
-    fun checkForGameFinished(): Triple<Boolean, Boolean, Boolean> {
+    fun checkForGameFinished(): Pair<Boolean, Boolean> {
         var flag = false
         var flagForColorForWin = false // true = winBlack, false = winWhite
-        var flagForDraw = false
         var counterForBlack = 0
         var counterForWhite = 0
         for (x in 0 until rows) {
@@ -327,22 +326,16 @@ class Field(listener: ActionListener) {
                 if (cell?.getChecker()?.getColorOfChecker() == Colors.WHITE) counterForWhite++
             }
         }
-
-        if (counterForWhite == counterForBlack) {
-            flag = false
-            flagForDraw = true
-        } else {
-            if (counterForWhite == 0) {
-                flag = true
-                flagForColorForWin = true
-            }
-
-            if (counterForBlack == 0) {
-                flag = true
-                flagForColorForWin = false
-            }
+        if (counterForWhite == 0) {
+            flag = true
+            flagForColorForWin = true
         }
-        return Triple(flag, flagForColorForWin, flagForDraw)
+
+        if (counterForBlack == 0) {
+            flag = true
+            flagForColorForWin = false
+        }
+        return Pair(flag, flagForColorForWin)
     }
 }
 
