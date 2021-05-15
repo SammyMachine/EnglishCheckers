@@ -10,6 +10,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.EnglishCheckers">
         <activity
+            android:name=".Draw"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".FinishedGameWhite"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".FinishedGame"
             android:screenOrientation="portrait" />
         <activity

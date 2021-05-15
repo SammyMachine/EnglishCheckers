@@ -1,3 +1,4 @@
+import android.provider.CalendarContract
 import com.example.englishcheckers.R
 
 class Field(listener: ActionListener) {
@@ -71,49 +72,83 @@ class Field(listener: ActionListener) {
             for (y in 0 until columns) {
                 val cell = getCellFromField(x, y)
                 if (cell!!.getChecker() != null) {
-                    if ((cell.getChecker()!!.getColorOfChecker() == Colors.BLACK && moveFlag) || (cell.getChecker()!!.getColorOfChecker() == Colors.WHITE && !moveFlag)) {
+                    if ((cell.getChecker()!!
+                            .getColorOfChecker() == Colors.BLACK && moveFlag) || (cell.getChecker()!!
+                            .getColorOfChecker() == Colors.WHITE && !moveFlag)
+                    ) {
                         if (cell.getChecker()!!.getInfoAboutQueen()) {
                             for (element in varyList) {
-                                val potentialCell = getCellFromField(cell.getX() + 2 * element.first, cell.getY() + 2 * element.second)
+                                val potentialCell = getCellFromField(
+                                    cell.getX() + 2 * element.first,
+                                    cell.getY() + 2 * element.second
+                                )
                                 if (potentialCell != null)
                                     if (potentialCell.getChecker() == null) {
-                                        val cellBetweenOurAndPotential = getCellFromField(cell.getX() + element.first, cell.getY() + element.second)
-                                        if (cellBetweenOurAndPotential!!.getChecker() != null && cellBetweenOurAndPotential.getChecker()?.getColorOfChecker() != cell.getChecker()?.getColorOfChecker()) {
+                                        val cellBetweenOurAndPotential = getCellFromField(
+                                            cell.getX() + element.first,
+                                            cell.getY() + element.second
+                                        )
+                                        if (cellBetweenOurAndPotential!!.getChecker() != null &&
+                                            cellBetweenOurAndPotential.getChecker()
+                                                ?.getColorOfChecker()
+                                            != cell.getChecker()?.getColorOfChecker()
+                                        ) {
                                             listOfPotentialCells.add(potentialCell)
                                         }
                                     }
                             }
                             if (listOfPotentialCells.size != 0) {
-                                requiredSteps[cell] = mutableListOf<Cell?>().apply { addAll(listOfPotentialCells) }
+                                requiredSteps[cell] =
+                                    mutableListOf<Cell?>().apply { addAll(listOfPotentialCells) }
                                 listOfPotentialCells.clear()
                             }
                         } else {
                             if (cell.getChecker()!!.getColorOfChecker() == Colors.BLACK) {
                                 for (i in 0 until varyList.size - 1 step 2) {
-                                    val potentialCell = getCellFromField(cell.getX() + 2 * varyList[i].first, cell.getY() + 2 * varyList[i].second)
+                                    val potentialCell = getCellFromField(
+                                        cell.getX() + 2 * varyList[i].first,
+                                        cell.getY() + 2 * varyList[i].second
+                                    )
                                     if (potentialCell != null)
                                         if (potentialCell.getChecker() == null) {
-                                            val cellBetweenOurAndPotential = getCellFromField(cell.getX() + varyList[i].first, cell.getY() + varyList[i].second)
-                                            if (cellBetweenOurAndPotential!!.getChecker() != null && cellBetweenOurAndPotential.getChecker()?.getColorOfChecker() == Colors.WHITE)
+                                            val cellBetweenOurAndPotential = getCellFromField(
+                                                cell.getX() + varyList[i].first,
+                                                cell.getY() + varyList[i].second
+                                            )
+                                            if (cellBetweenOurAndPotential!!.getChecker() != null &&
+                                                cellBetweenOurAndPotential.getChecker()
+                                                    ?.getColorOfChecker() == Colors.WHITE
+                                            )
                                                 listOfPotentialCells.add(potentialCell)
                                         }
                                 }
                                 if (listOfPotentialCells.size != 0) {
-                                    requiredSteps[cell] = mutableListOf<Cell?>().apply { addAll(listOfPotentialCells) }
+                                    requiredSteps[cell] =
+                                        mutableListOf<Cell?>().apply { addAll(listOfPotentialCells) }
                                     listOfPotentialCells.clear()
                                 }
                             } else {
                                 for (i in 1 until varyList.size step 2) {
-                                    val potentialCell = getCellFromField(cell.getX() + 2 * varyList[i].first, cell.getY() + 2 * varyList[i].second)
+                                    val potentialCell = getCellFromField(
+                                        cell.getX() + 2 * varyList[i].first,
+                                        cell.getY() + 2 * varyList[i].second
+                                    )
                                     if (potentialCell != null)
                                         if (potentialCell.getChecker() == null) {
-                                            val cellBetweenOurAndPotential = getCellFromField(cell.getX() + varyList[i].first, cell.getY() + varyList[i].second)
-                                            if (cellBetweenOurAndPotential!!.getChecker() != null && cellBetweenOurAndPotential.getChecker()?.getColorOfChecker() == Colors.BLACK)
+                                            val cellBetweenOurAndPotential = getCellFromField(
+                                                cell.getX() + varyList[i].first,
+                                                cell.getY() + varyList[i].second
+                                            )
+                                            if (cellBetweenOurAndPotential!!.getChecker() != null &&
+                                                cellBetweenOurAndPotential.getChecker()
+                                                    ?.getColorOfChecker() == Colors.BLACK
+                                            )
                                                 listOfPotentialCells.add(potentialCell)
                                         }
                                 }
                                 if (listOfPotentialCells.size != 0) {
-                                    requiredSteps[cell] = mutableListOf<Cell?>().apply { addAll(listOfPotentialCells) }
+                                    requiredSteps[cell] =
+                                        mutableListOf<Cell?>().apply { addAll(listOfPotentialCells) }
                                     listOfPotentialCells.clear()
                                 }
                             }
@@ -125,84 +160,153 @@ class Field(listener: ActionListener) {
     }
 
 
-    fun possibleSteps(cell: Cell, moveFlag: Boolean): MutableList<Cell?> {
+    fun possibleSteps(moveFlag: Boolean): MutableMap<Cell?, MutableList<Cell?>> {
         val varyList = listOf(Pair(-1, -1), Pair(-1, 1), Pair(1, -1), Pair(1, 1))
-        val possibleSteps = mutableListOf<Cell?>()
-        if ((cell.getChecker()!!.getColorOfChecker() == Colors.BLACK && moveFlag) || (cell.getChecker()!!.getColorOfChecker() == Colors.WHITE && !moveFlag)) {
-            if (cell.getChecker()!!.getInfoAboutQueen()) {
-                for (element in varyList) {
-                    val potentialCell = getCellFromField(cell.getX() + element.first, cell.getY() + element.second)
-                    if (potentialCell != null)
-                        if (potentialCell.getChecker() == null)
-                            possibleSteps.add(potentialCell)
-                }
-            }
-            if (!cell.getChecker()!!.getInfoAboutQueen()) {
-                if (cell.getChecker()?.getColorOfChecker() == Colors.BLACK) {
-                    for (i in 0 until varyList.size - 1 step 2) {
-                        val potentialCell = getCellFromField(cell.getX() + varyList[i].first, cell.getY() + varyList[i].second)
-                        if (potentialCell != null)
-                            if (potentialCell.getChecker() == null)
-                                possibleSteps.add(potentialCell)
+        val possibleSteps = mutableMapOf<Cell?, MutableList<Cell?>>()
+        val listOfPotentialCells = mutableListOf<Cell?>()
+        for (x in 0 until rows) {
+            for (y in 0 until columns) {
+                val cell = getCellFromField(x, y)
+                if (cell?.getChecker() != null) {
+                    if ((cell.getChecker()!!.getColorOfChecker() == Colors.BLACK && moveFlag) ||
+                        (cell.getChecker()!!.getColorOfChecker() == Colors.WHITE && !moveFlag)
+                    ) {
+                        if (cell.getChecker()!!.getInfoAboutQueen()) {
+                            for (element in varyList) {
+                                val potentialCell = getCellFromField(
+                                    cell.getX() + element.first,
+                                    cell.getY() + element.second
+                                )
+                                if (potentialCell != null)
+                                    if (potentialCell.getChecker() == null)
+                                        listOfPotentialCells.add(potentialCell)
+                            }
+                            if (listOfPotentialCells.size != 0) {
+                                possibleSteps[cell] =
+                                    mutableListOf<Cell?>().apply { addAll(listOfPotentialCells) }
+                                listOfPotentialCells.clear()
+                            }
+                        }
+                        if (!cell.getChecker()!!.getInfoAboutQueen()) {
+                            if (cell.getChecker()?.getColorOfChecker() == Colors.BLACK) {
+                                for (i in 0 until varyList.size - 1 step 2) {
+                                    val potentialCell = getCellFromField(
+                                        cell.getX() + varyList[i].first,
+                                        cell.getY() + varyList[i].second
+                                    )
+                                    if (potentialCell != null)
+                                        if (potentialCell.getChecker() == null)
+                                            listOfPotentialCells.add(potentialCell)
+                                }
+                                if (listOfPotentialCells.size != 0) {
+                                    possibleSteps[cell] =
+                                        mutableListOf<Cell?>().apply { addAll(listOfPotentialCells) }
+                                    listOfPotentialCells.clear()
+                                }
+                            }
+                            if (cell.getChecker()?.getColorOfChecker() == Colors.WHITE) {
+                                for (i in 1 until varyList.size step 2) {
+                                    val potentialCell = getCellFromField(
+                                        cell.getX() + varyList[i].first,
+                                        cell.getY() + varyList[i].second
+                                    )
+                                    if (potentialCell != null)
+                                        if (potentialCell.getChecker() == null)
+                                            listOfPotentialCells.add(potentialCell)
+                                }
+                                if (listOfPotentialCells.size != 0) {
+                                    possibleSteps[cell] =
+                                        mutableListOf<Cell?>().apply { addAll(listOfPotentialCells) }
+                                    listOfPotentialCells.clear()
+                                }
+
+                            }
+                        }
                     }
                 }
-                if (cell.getChecker()?.getColorOfChecker() == Colors.WHITE)
-                    for (i in 1 until varyList.size step 2) {
-                        val potentialCell = getCellFromField(cell.getX() + varyList[i].first, cell.getY() + varyList[i].second)
-                        if (potentialCell != null)
-                            if (potentialCell.getChecker() == null)
-                                possibleSteps.add(potentialCell)
-                    }
             }
         }
         return possibleSteps
     }
 
-    fun checkForEatMore(selectedCell: Cell?, possibleSteps: MutableMap<Cell?, MutableList<Cell?>>): MutableMap<Cell?, MutableList<Cell?>> {
+    fun checkForEatMore(
+        selectedCell: Cell?,
+        possibleSteps: MutableMap<Cell?, MutableList<Cell?>>
+    ): MutableMap<Cell?, MutableList<Cell?>> {
         possibleSteps.clear()
         val listOfPotentialCells = mutableListOf<Cell?>()
         val varyList = listOf(Pair(-1, -1), Pair(-1, 1), Pair(1, -1), Pair(1, 1))
         if (selectedCell?.getChecker()!!.getInfoAboutQueen()) {
             for (i in varyList.indices) {
-                val potentialCell = getCellFromField(selectedCell.getX() + 2 * varyList[i].first, selectedCell.getY() + 2 * varyList[i].second)
+                val potentialCell = getCellFromField(
+                    selectedCell.getX() + 2 * varyList[i].first,
+                    selectedCell.getY() + 2 * varyList[i].second
+                )
                 if (potentialCell != null)
                     if (potentialCell.getChecker() == null) {
-                        val cellBetweenOurAndPotential = getCellFromField(selectedCell.getX() + varyList[i].first, selectedCell.getY() + varyList[i].second)
-                        if (cellBetweenOurAndPotential!!.getChecker() != null && cellBetweenOurAndPotential.getChecker()?.getColorOfChecker() != selectedCell.getChecker()?.getColorOfChecker())
+                        val cellBetweenOurAndPotential = getCellFromField(
+                            selectedCell.getX() + varyList[i].first,
+                            selectedCell.getY() + varyList[i].second
+                        )
+                        if (cellBetweenOurAndPotential!!.getChecker() != null && cellBetweenOurAndPotential.getChecker()
+                                ?.getColorOfChecker() != selectedCell.getChecker()
+                                ?.getColorOfChecker()
+                        )
                             listOfPotentialCells.add(potentialCell)
                     }
                 if (listOfPotentialCells.size != 0) {
-                    possibleSteps[selectedCell] = mutableListOf<Cell?>().apply { addAll(listOfPotentialCells) }
+                    possibleSteps[selectedCell] =
+                        mutableListOf<Cell?>().apply { addAll(listOfPotentialCells) }
                     listOfPotentialCells.clear()
                 }
             }
         } else {
             if (selectedCell.getChecker()!!.getColorOfChecker() == Colors.BLACK) {
                 for (i in 0 until varyList.size - 1 step 2) {
-                    val potentialCell = getCellFromField(selectedCell.getX() + 2 * varyList[i].first, selectedCell.getY() + 2 * varyList[i].second)
+                    val potentialCell = getCellFromField(
+                        selectedCell.getX() + 2 * varyList[i].first,
+                        selectedCell.getY() + 2 * varyList[i].second
+                    )
                     if (potentialCell != null)
                         if (potentialCell.getChecker() == null) {
-                            val cellBetweenOurAndPotential = getCellFromField(selectedCell.getX() + varyList[i].first, selectedCell.getY() + varyList[i].second)
-                            if (cellBetweenOurAndPotential!!.getChecker() != null && cellBetweenOurAndPotential.getChecker()?.getColorOfChecker() != selectedCell.getChecker()?.getColorOfChecker())
+                            val cellBetweenOurAndPotential = getCellFromField(
+                                selectedCell.getX() + varyList[i].first,
+                                selectedCell.getY() + varyList[i].second
+                            )
+                            if (cellBetweenOurAndPotential!!.getChecker() != null && cellBetweenOurAndPotential.getChecker()
+                                    ?.getColorOfChecker() != selectedCell.getChecker()
+                                    ?.getColorOfChecker()
+                            )
                                 listOfPotentialCells.add(potentialCell)
                         }
                 }
                 if (listOfPotentialCells.size != 0) {
-                    possibleSteps[selectedCell] = mutableListOf<Cell?>().apply { addAll(listOfPotentialCells) }
+                    possibleSteps[selectedCell] =
+                        mutableListOf<Cell?>().apply { addAll(listOfPotentialCells) }
                     listOfPotentialCells.clear()
                 }
             } else {
                 for (i in 1 until varyList.size step 2) {
-                    val potentialCell = getCellFromField(selectedCell.getX() + 2 * varyList[i].first, selectedCell.getY() + 2 * varyList[i].second)
+                    val potentialCell = getCellFromField(
+                        selectedCell.getX() + 2 * varyList[i].first,
+                        selectedCell.getY() + 2 * varyList[i].second
+                    )
                     if (potentialCell != null)
                         if (potentialCell.getChecker() == null) {
-                            val cellBetweenOurAndPotential = getCellFromField(selectedCell.getX() + varyList[i].first, selectedCell.getY() + varyList[i].second)
-                            if (cellBetweenOurAndPotential!!.getChecker() != null && cellBetweenOurAndPotential.getChecker()?.getColorOfChecker() != selectedCell.getChecker()?.getColorOfChecker())
+                            val cellBetweenOurAndPotential = getCellFromField(
+                                selectedCell.getX() + varyList[i].first,
+                                selectedCell.getY() + varyList[i].second
+                            )
+                            if (cellBetweenOurAndPotential!!.getChecker() != null && cellBetweenOurAndPotential.getChecker()
+                                    ?.getColorOfChecker() != selectedCell.getChecker()
+                                    ?.getColorOfChecker()
+                            )
                                 listOfPotentialCells.add(potentialCell)
                         }
                 }
                 if (listOfPotentialCells.size != 0) {
-                    possibleSteps[selectedCell] = mutableListOf<Cell?>().apply { addAll(listOfPotentialCells) }
+                    possibleSteps[selectedCell] =
+                        mutableListOf<Cell?>().apply { addAll(listOfPotentialCells) }
                     listOfPotentialCells.clear()
                 }
             }
@@ -210,8 +314,10 @@ class Field(listener: ActionListener) {
         return possibleSteps
     }
 
-    fun checkForGameFinished(): Boolean {
+    fun checkForGameFinished(): Triple<Boolean, Boolean, Boolean> {
         var flag = false
+        var flagForColorForWin = false // true = winBlack, false = winWhite
+        var flagForDraw = false
         var counterForBlack = 0
         var counterForWhite = 0
         for (x in 0 until rows) {
@@ -221,8 +327,22 @@ class Field(listener: ActionListener) {
                 if (cell?.getChecker()?.getColorOfChecker() == Colors.WHITE) counterForWhite++
             }
         }
-        if (counterForBlack == 0 || counterForWhite == 0) flag = true
-        return flag
+
+        if (counterForWhite == counterForBlack) {
+            flag = false
+            flagForDraw = true
+        } else {
+            if (counterForWhite == 0) {
+                flag = true
+                flagForColorForWin = true
+            }
+
+            if (counterForBlack == 0) {
+                flag = true
+                flagForColorForWin = false
+            }
+        }
+        return Triple(flag, flagForColorForWin, flagForDraw)
     }
 }
 

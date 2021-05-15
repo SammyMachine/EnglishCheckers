@@ -42,8 +42,18 @@ class StartField : AppCompatActivity(), Field.ActionListener {
 
     }
 
-    fun moveToFinish() {
+    fun moveToFinishBlack() {
         val startFieldIntent = Intent(this, FinishedGame::class.java)
+        startActivity(startFieldIntent)
+    }
+
+    fun moveToFinishWhite() {
+        val startFieldIntent = Intent(this, FinishedGameWhite::class.java)
+        startActivity(startFieldIntent)
+    }
+
+    fun moveToDraw() {
+        val startFieldIntent = Intent(this, Draw::class.java)
         startActivity(startFieldIntent)
     }
 
@@ -58,7 +68,10 @@ class StartField : AppCompatActivity(), Field.ActionListener {
         else cell.getChecker()?.getColorOfChecker() == Colors.WHITE
     }
 
-    private fun flagToPickNonEater(selectedCell: Cell, requiredSteps: Map<Cell?, List<Cell?>>): Boolean {
+    private fun flagToPickNonEater(
+        selectedCell: Cell,
+        requiredSteps: Map<Cell?, List<Cell?>>
+    ): Boolean {
         var flag = false
         for (i in requiredSteps.keys) {
             if (selectedCell == i) flag = true
@@ -66,7 +79,11 @@ class StartField : AppCompatActivity(), Field.ActionListener {
         return flag
     }
 
-    private fun flagToMove(selectedCell: Cell, cell: Cell, possibleSteps: Map<Cell?, List<Cell?>>): Boolean = possibleSteps[selectedCell]?.contains(cell)!!
+    private fun flagToMove(
+        selectedCell: Cell,
+        cell: Cell,
+        possibleSteps: Map<Cell?, List<Cell?>>
+    ): Boolean = possibleSteps[selectedCell]?.contains(cell)!!
 
     override fun checkerAdded(position: Cell) {
         val column = findTag(table, String.valueOf(position.getY()))
@@ -75,7 +92,8 @@ class StartField : AppCompatActivity(), Field.ActionListener {
             pictureOfChecker.setImageResource(R.drawable.biege_checker)
         else
             pictureOfChecker.setImageResource(R.drawable.red_checker)
-        val layout = Objects.requireNonNull(column)?.findViewWithTag<LinearLayout>(String.valueOf(position.getX()))
+        val layout = Objects.requireNonNull(column)
+            ?.findViewWithTag<LinearLayout>(String.valueOf(position.getX()))
         if (layout != null) {
             layout.addView(pictureOfChecker)
         }
@@ -101,7 +119,9 @@ class StartField : AppCompatActivity(), Field.ActionListener {
         for ((_, value) in potentialSteps) {
             for (i in value.indices) {
                 val column = findTag(table, String.valueOf(value[i]?.getY()))
-                Objects.requireNonNull(column)?.findViewWithTag<View>(String.valueOf(value[i]?.getX()))?.setBackgroundColor(ContextCompat.getColor(this, android.R.color.black))
+                Objects.requireNonNull(column)
+                    ?.findViewWithTag<View>(String.valueOf(value[i]?.getX()))
+                    ?.setBackgroundColor(ContextCompat.getColor(this, android.R.color.black))
             }
         }
         for (i in views.indices) {
@@ -118,10 +138,6 @@ class StartField : AppCompatActivity(), Field.ActionListener {
             }
         }
         return flag
-    }
-
-    fun gameWasFinished() {
-
     }
 
     fun becomeQueen(cell: Cell) {
@@ -141,41 +157,62 @@ class StartField : AppCompatActivity(), Field.ActionListener {
         if (clickCounter == 1) {
             val cell1 = startField.getCellFromField(posX, posY)
             if (cell1!!.getChecker() != null) {
-                if (cell1.getChecker()?.getColorOfChecker() == selectedCell.getChecker()?.getColorOfChecker())
+                if (cell1.getChecker()?.getColorOfChecker() == selectedCell.getChecker()
+                        ?.getColorOfChecker()
+                )
                     clickCounter = 0
             } else {
                 if (flagToMove(selectedCell, cell1, potentialSteps)) {
                     if (selectedCell in potentialSteps.keys)
                         if (((selectedCell.getX() - (cell1.getX())) == 2 || (selectedCell.getX() - (cell1.getX())) == -2)
-                                && ((selectedCell.getY() - (cell1.getY())) == 2 || (selectedCell.getY() - (cell1.getY())) == -2)) {
+                            && ((selectedCell.getY() - (cell1.getY())) == 2 || (selectedCell.getY() - (cell1.getY())) == -2)
+                        ) {
                             val entry = mutableMapOf<Cell?, MutableList<Cell?>>()
                             entry[selectedCell] = potentialSteps[selectedCell]!!
                             if (multiEatSituation(cell1, potentialSteps)) {
-                                startField.getCellFromField(posX, posY)?.setChecker(selectedCell.getChecker())
-                                startField.getCellFromField(selectedCell.getX(), selectedCell.getY())?.setChecker(null)
+                                startField.getCellFromField(posX, posY)
+                                    ?.setChecker(selectedCell.getChecker())
+                                startField.getCellFromField(
+                                    selectedCell.getX(),
+                                    selectedCell.getY()
+                                )?.setChecker(null)
                                 checkerMoved(selectedCell, cell1)
-                                checkerWasEaten(startField.getCellFromField((cell1.getX() + selectedCell.getX()) / 2, (cell1.getY() + selectedCell.getY()) / 2)!!)
-                                startField.getCellFromField((cell1.getX() + selectedCell.getX()) / 2, (cell1.getY() + selectedCell.getY()) / 2)!!.setChecker(null)
+                                checkerWasEaten(
+                                    startField.getCellFromField(
+                                        (cell1.getX() + selectedCell.getX()) / 2,
+                                        (cell1.getY() + selectedCell.getY()) / 2
+                                    )!!
+                                )
+                                startField.getCellFromField(
+                                    (cell1.getX() + selectedCell.getX()) / 2,
+                                    (cell1.getY() + selectedCell.getY()) / 2
+                                )!!.setChecker(null)
                                 if (startField.checkForEatMore(cell1, entry).isNotEmpty()) {
                                     clickCounter = 0
                                 } else {
                                     if (cell1.getChecker()?.getColorOfChecker() == Colors.BLACK) {
                                         if (cell1.getY() == 0) {
                                             becomeQueen(cell1)
-                                            cell1.setChecker(Checker(cell1.getChecker()!!.getColorOfChecker(), true))
+                                            cell1.setChecker(
+                                                Checker(
+                                                    cell1.getChecker()!!.getColorOfChecker(), true
+                                                )
+                                            )
                                         }
-                                    }
-                                    else {
+                                    } else {
                                         if (cell1.getY() == 7) {
                                             becomeQueen(cell1)
-                                            cell1.setChecker(Checker(cell1.getChecker()!!.getColorOfChecker(), true))
+                                            cell1.setChecker(
+                                                Checker(
+                                                    cell1.getChecker()!!.getColorOfChecker(), true
+                                                )
+                                            )
                                         }
                                     }
                                     clickCounter = 0
                                     moveFlag = !moveFlag
                                 }
-                            }
-                            else {
+                            } else {
                                 if (startField.checkForEatMore(cell1, entry).isNotEmpty()) {
                                     clickCounter = 0
                                 } else {
@@ -184,19 +221,28 @@ class StartField : AppCompatActivity(), Field.ActionListener {
                                 }
                             }
                         } else {
-                            startField.getCellFromField(posX, posY)?.setChecker(selectedCell.getChecker())
-                            startField.getCellFromField(selectedCell.getX(), selectedCell.getY())?.setChecker(null)
+                            startField.getCellFromField(posX, posY)
+                                ?.setChecker(selectedCell.getChecker())
+                            startField.getCellFromField(selectedCell.getX(), selectedCell.getY())
+                                ?.setChecker(null)
                             checkerMoved(selectedCell, cell1)
                             if (cell1.getChecker()?.getColorOfChecker() == Colors.BLACK) {
                                 if (cell1.getY() == 0) {
                                     becomeQueen(cell1)
-                                    cell1.setChecker(Checker(cell1.getChecker()!!.getColorOfChecker(), true))
+                                    cell1.setChecker(
+                                        Checker(
+                                            cell1.getChecker()!!.getColorOfChecker(), true
+                                        )
+                                    )
                                 }
-                            }
-                            else {
+                            } else {
                                 if (cell1.getY() == 7) {
                                     becomeQueen(cell1)
-                                    cell1.setChecker(Checker(cell1.getChecker()!!.getColorOfChecker(), true))
+                                    cell1.setChecker(
+                                        Checker(
+                                            cell1.getChecker()!!.getColorOfChecker(), true
+                                        )
+                                    )
                                 }
                             }
                             moveFlag = !moveFlag
@@ -208,42 +254,82 @@ class StartField : AppCompatActivity(), Field.ActionListener {
             viewNow.clear()
         }
         if (clickCounter == 0) {
-            if (!startField.checkForGameFinished()) {
+            if (!startField.checkForGameFinished().first) {
                 val cell = startField.getCellFromField(posX, posY)
                 if (cell?.getChecker() != null) {
                     if (flagToPickAnotherColor(cell, moveFlag)) {
                         val requiredSteps = startField.requiredSteps(moveFlag)
-                        val possibleSteps = startField.possibleSteps(cell, moveFlag)
+                        val possibleSteps = startField.possibleSteps(moveFlag)
                         if (requiredSteps.isNotEmpty()) {
                             potentialSteps = requiredSteps
                             for ((key, list) in potentialSteps) {
                                 val column1 = findTag(table, String.valueOf(key?.getY()))
-                                Objects.requireNonNull(column1)?.findViewWithTag<LinearLayout>(String.valueOf(column1?.getX()))?.setBackgroundColor(ContextCompat.getColor(this, R.color.positionAtTheMomentColor))
+                                Objects.requireNonNull(column1)
+                                    ?.findViewWithTag<LinearLayout>(String.valueOf(column1?.getX()))
+                                    ?.setBackgroundColor(
+                                        ContextCompat.getColor(
+                                            this,
+                                            R.color.positionAtTheMomentColor
+                                        )
+                                    )
                                 for (i in list.indices) {
                                     val column = findTag(table, String.valueOf(list[i]?.getY()))
-                                    Objects.requireNonNull(column)?.findViewWithTag<LinearLayout>(String.valueOf(list[i]?.getX()))?.setBackgroundColor(ContextCompat.getColor(this, R.color.possibleStepColor))
+                                    Objects.requireNonNull(column)
+                                        ?.findViewWithTag<LinearLayout>(String.valueOf(list[i]?.getX()))
+                                        ?.setBackgroundColor(
+                                            ContextCompat.getColor(
+                                                this,
+                                                R.color.possibleStepColor
+                                            )
+                                        )
                                 }
                             }
                             selectedCell = cell
                             if (flagToPickNonEater(selectedCell, requiredSteps)) clickCounter++
-                        } else {
-                            potentialSteps[cell] = possibleSteps
+                        } else if (possibleSteps.isNotEmpty()) {
+                            potentialSteps[cell] = possibleSteps[cell]!!
                             if (cell.getChecker() != null) {
-                                view.setBackgroundColor(ContextCompat.getColor(this, R.color.positionAtTheMomentColor));
+                                view.setBackgroundColor(
+                                    ContextCompat.getColor(
+                                        this,
+                                        R.color.positionAtTheMomentColor
+                                    )
+                                );
                                 viewNow.add(view)
                             }
                             for (i in potentialSteps[cell]!!.indices) {
-                                val column = findTag(table, String.valueOf(potentialSteps[cell]?.get(i)?.getY()))
-                                Objects.requireNonNull(column)?.findViewWithTag<LinearLayout>(String.valueOf(potentialSteps[cell]?.get(i)?.getX()))?.setBackgroundColor(ContextCompat.getColor(this, R.color.possibleStepColor))
+                                val column = findTag(
+                                    table,
+                                    String.valueOf(potentialSteps[cell]?.get(i)?.getY())
+                                )
+                                Objects.requireNonNull(column)?.findViewWithTag<LinearLayout>(
+                                    String.valueOf(
+                                        potentialSteps[cell]?.get(i)?.getX()
+                                    )
+                                )?.setBackgroundColor(
+                                    ContextCompat.getColor(
+                                        this,
+                                        R.color.possibleStepColor
+                                    )
+                                )
                             }
                             selectedCell = cell
                             clickCounter++
+                        } else {
+                            if (startField.checkForGameFinished().third) {
+                                moveToDraw()
+                            }
                         }
                     }
                 }
-            }
-            else {
-                moveToFinish()
+            } else {
+                if (!startField.checkForGameFinished().third) {
+                    if (startField.checkForGameFinished().second) {
+                        moveToFinishBlack()
+                    } else {
+                        moveToFinishWhite()
+                    }
+                }
             }
         }
     }

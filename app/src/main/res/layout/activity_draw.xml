@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".FinishedGame"
+    tools:context=".Draw"
     android:background="@drawable/wood_background">
 
     <ImageView
@@ -16,10 +16,10 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.496"
-        app:srcCompat="@drawable/congrats" />
+        app:srcCompat="@drawable/draw" />
 
     <Button
-        android:onClick="moveToMenu"
+        android:onClick="moveToStartMenu"
         android:id="@+id/back_to_Menu"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -32,4 +32,5 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.787" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
