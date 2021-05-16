@@ -1,7 +1,6 @@
 package com.example.englishcheckers
 
 import Cell
-import Checker
 import Colors
 import Field
 import android.content.Intent
@@ -12,10 +11,8 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import java.lang.Math.abs
 import java.lang.String
 import java.util.*
-import kotlin.math.abs
 import kotlin.properties.Delegates
 
 
@@ -35,6 +32,7 @@ class StartField : AppCompatActivity(), Field.ActionListener {
         startField.actionListener(this)
         startField.fillFieldByCheckers()
         moveFlag = true
+        views = mutableListOf()
 
     }
 
@@ -59,10 +57,16 @@ class StartField : AppCompatActivity(), Field.ActionListener {
         return null
     }
 
-    override fun getCheckerLayout(cell: Cell): LinearLayout? {
+    override fun getCellLayout(cell: Cell): LinearLayout? {
+        val column = findTag(table, String.valueOf(cell.getY()))
+        return Objects.requireNonNull(column)?.findViewWithTag(String.valueOf(cell.getX()))!!
+    }
+
+    fun getCheckerLayout(cell: Cell): LinearLayout? {
         val column = findTag(table, String.valueOf(cell.getY()))
         return Objects.requireNonNull(column)?.findViewWithTag(String.valueOf(cell.getX()))
     }
+
 
     override fun setColorOfPotentialCell(x: Int, y: Int, color: Colors) {
         val column1 = findTag(table, String.valueOf(y))
@@ -73,8 +77,8 @@ class StartField : AppCompatActivity(), Field.ActionListener {
 
     override fun setColorOfChosenCell(x: Int, y: Int, color: Colors): Pair<Int, Int> {
         val column1 = findTag(table, String.valueOf(y))
-        if (color == Colors.POSSIBLE_STEP_COLOR) Objects.requireNonNull(column1)?.findViewWithTag<LinearLayout>(String.valueOf(x))?.setBackgroundColor(
-            ContextCompat.getColor(this, R.color.possibleStepColor))
+        if (color == Colors.POSITION_AT_THE_MOMENT) Objects.requireNonNull(column1)?.findViewWithTag<LinearLayout>(String.valueOf(x))?.setBackgroundColor(
+            ContextCompat.getColor(this, R.color.positionAtTheMomentColor))
         return Pair(x, y)
     }
 
@@ -116,7 +120,11 @@ class StartField : AppCompatActivity(), Field.ActionListener {
     }
 
     override fun boardClear(potentialSteps: Map<Cell?, List<Cell?>>, views: List<View?>) {
-        for ((_, value) in potentialSteps) {
+        for ((key, value) in potentialSteps) {
+            val column1 = findTag(table, String.valueOf(key?.getY()))
+            Objects.requireNonNull(column1)
+                ?.findViewWithTag<View>(String.valueOf(key?.getX()))
+                ?.setBackgroundColor(ContextCompat.getColor(this, android.R.color.black))
             for (i in value.indices) {
                 val column = findTag(table, String.valueOf(value[i]?.getY()))
                 Objects.requireNonNull(column)
