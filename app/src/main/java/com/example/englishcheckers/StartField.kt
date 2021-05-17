@@ -36,62 +36,30 @@ class StartField : AppCompatActivity(), Field.ActionListener {
 
     }
 
-    fun moveToFinishBlack() {
+    private fun moveToFinishBlack() {
         val startFieldIntent = Intent(this, FinishedGame::class.java)
         startActivity(startFieldIntent)
     }
 
-    fun moveToFinishWhite() {
+    private fun moveToFinishWhite() {
         val startFieldIntent = Intent(this, FinishedGameWhite::class.java)
         startActivity(startFieldIntent)
     }
 
-    fun moveToDraw() {
+    private fun moveToDraw() {
         val startFieldIntent = Intent(this, Draw::class.java)
         startActivity(startFieldIntent)
     }
 
-    private fun findTag(zxc: ViewGroup, tag: Any): View? {
-        for (i in 0 until zxc.childCount)
-            if (zxc.getChildAt(i).getTag().equals(tag)) return zxc.getChildAt(i)
+    private fun findTag(viewGroup: ViewGroup, tag: Any): View? {
+        for (i in 0 until viewGroup.childCount)
+            if (viewGroup.getChildAt(i).tag == tag) return viewGroup.getChildAt(i)
         return null
     }
 
-    override fun getCellLayout(cell: Cell): LinearLayout? {
-        val column = findTag(table, String.valueOf(cell.getY()))
-        return Objects.requireNonNull(column)?.findViewWithTag(String.valueOf(cell.getX()))!!
-    }
-
-    fun getCheckerLayout(cell: Cell): LinearLayout? {
+    private fun getCheckerLayout(cell: Cell): LinearLayout? {
         val column = findTag(table, String.valueOf(cell.getY()))
         return Objects.requireNonNull(column)?.findViewWithTag(String.valueOf(cell.getX()))
-    }
-
-
-    override fun setColorOfPotentialCell(x: Int, y: Int, color: Colors) {
-        val column1 = findTag(table, String.valueOf(y))
-        if (color == Colors.POSSIBLE_STEP_COLOR) Objects.requireNonNull(column1)?.findViewWithTag<LinearLayout>(String.valueOf(x))?.setBackgroundColor(
-            ContextCompat.getColor(this, R.color.possibleStepColor))
-
-    }
-
-    override fun setColorOfChosenCell(x: Int, y: Int, color: Colors): Pair<Int, Int> {
-        val column1 = findTag(table, String.valueOf(y))
-        if (color == Colors.POSITION_AT_THE_MOMENT) Objects.requireNonNull(column1)?.findViewWithTag<LinearLayout>(String.valueOf(x))?.setBackgroundColor(
-            ContextCompat.getColor(this, R.color.positionAtTheMomentColor))
-        return Pair(x, y)
-    }
-
-    override fun convertCoordinatesToViews(viewNow: MutableList<Pair<Int, Int>>): MutableList<View?> {
-        for (i in viewNow.indices) {
-            val column1 = findTag(table, String.valueOf(viewNow[i].second))
-            views.add(Objects.requireNonNull(column1)?.findViewWithTag<LinearLayout>(String.valueOf(viewNow[i].first))!!)
-        }
-        return views
-    }
-
-    override fun addingToView(view: View) {
-        views.add(view)
     }
 
     override fun checkerAdded(position: Cell) {
@@ -101,8 +69,7 @@ class StartField : AppCompatActivity(), Field.ActionListener {
             pictureOfChecker.setImageResource(R.drawable.biege_checker)
         else
             pictureOfChecker.setImageResource(R.drawable.red_checker)
-        val layout = Objects.requireNonNull(column)
-            ?.findViewWithTag<LinearLayout>(String.valueOf(position.getX()))
+        val layout = Objects.requireNonNull(column)?.findViewWithTag<LinearLayout>(String.valueOf(position.getX()))
         if (layout != null) {
             layout.addView(pictureOfChecker)
         }
@@ -122,23 +89,17 @@ class StartField : AppCompatActivity(), Field.ActionListener {
     override fun boardClear(potentialSteps: Map<Cell?, List<Cell?>>, views: List<View?>) {
         for ((key, value) in potentialSteps) {
             val column1 = findTag(table, String.valueOf(key?.getY()))
-            Objects.requireNonNull(column1)
-                ?.findViewWithTag<View>(String.valueOf(key?.getX()))
-                ?.setBackgroundColor(ContextCompat.getColor(this, android.R.color.black))
+            Objects.requireNonNull(column1)?.findViewWithTag<View>(String.valueOf(key?.getX()))?.setBackgroundColor(
+                ContextCompat.getColor(this, android.R.color.black))
             for (i in value.indices) {
                 val column = findTag(table, String.valueOf(value[i]?.getY()))
-                Objects.requireNonNull(column)
-                    ?.findViewWithTag<View>(String.valueOf(value[i]?.getX()))
-                    ?.setBackgroundColor(ContextCompat.getColor(this, android.R.color.black))
+                Objects.requireNonNull(column)?.findViewWithTag<View>(String.valueOf(value[i]?.getX()))?.setBackgroundColor(
+                    ContextCompat.getColor(this, android.R.color.black))
             }
         }
         for (i in views.indices) {
             views[i]?.setBackgroundColor(ContextCompat.getColor(this, android.R.color.black))
         }
-    }
-
-    override fun viewClearing(viewNow: MutableList<View?>) {
-        viewNow.clear()
     }
 
     override fun becomeQueen(cell: Cell) {
@@ -150,6 +111,42 @@ class StartField : AppCompatActivity(), Field.ActionListener {
         else
             pictureOfChecker.setImageResource(R.drawable.red_queen_checker)
         getCheckerLayout(cell)?.addView(pictureOfChecker)
+    }
+
+    override fun setColorOfPotentialCell(x: Int, y: Int, color: Colors) {
+        val column1 = findTag(table, String.valueOf(y))
+        if (color == Colors.POSSIBLE_STEP_COLOR)
+            Objects.requireNonNull(column1)?.findViewWithTag<LinearLayout>(String.valueOf(x))?.setBackgroundColor(
+            ContextCompat.getColor(this, R.color.possibleStepColor))
+    }
+
+    override fun setColorOfChosenCell(x: Int, y: Int, color: Colors): Pair<Int, Int> {
+        val column1 = findTag(table, String.valueOf(y))
+        if (color == Colors.POSITION_AT_THE_MOMENT)
+            Objects.requireNonNull(column1)?.findViewWithTag<LinearLayout>(String.valueOf(x))?.setBackgroundColor(
+            ContextCompat.getColor(this, R.color.positionAtTheMomentColor))
+        return Pair(x, y)
+    }
+
+    override fun viewClearing(viewNow: MutableList<View?>) {
+        viewNow.clear()
+    }
+
+    override fun addingToView(view: View) {
+        views.add(view)
+    }
+
+    override fun convertCoordinatesToViews(viewNow: MutableList<Pair<Int, Int>>): MutableList<View?> {
+        for (i in viewNow.indices) {
+            val column1 = findTag(table, String.valueOf(viewNow[i].second))
+            views.add(Objects.requireNonNull(column1)?.findViewWithTag<LinearLayout>(String.valueOf(viewNow[i].first))!!)
+        }
+        return views
+    }
+
+    override fun getCellLayout(cell: Cell): LinearLayout? {
+        val column = findTag(table, String.valueOf(cell.getY()))
+        return Objects.requireNonNull(column)?.findViewWithTag(String.valueOf(cell.getX()))!!
     }
 
     fun onClick(view: View) {

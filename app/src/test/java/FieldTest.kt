@@ -1,4 +1,4 @@
-import android.graphics.Color
+
 import org.junit.Test
 import org.junit.Assert.*
 
@@ -136,17 +136,17 @@ class FieldTest {
         comparedArrayWithCheckers[0][5] = Cell(0, 5, null)
         comparedArrayWithCheckers[1][4] = Cell(1, 4, Checker(Colors.BLACK, false))
         startField.moveChecker(startField.getCellFromField(0, 5)!!, startField.getCellFromField(1, 4)!!)
-        comparedArrayWithCheckers[1][3] = Cell(1, 3, null)
-        comparedArrayWithCheckers[2][4] = Cell(2, 4, Checker(Colors.WHITE, false))
-        startField.moveChecker(startField.getCellFromField(1, 3)!!, startField.getCellFromField(2, 4)!!)
+        comparedArrayWithCheckers[1][2] = Cell(1, 2, null)
+        comparedArrayWithCheckers[2][3] = Cell(2, 3, Checker(Colors.WHITE, false))
+        startField.moveChecker(startField.getCellFromField(1, 2)!!, startField.getCellFromField(2, 3)!!)
         comparedArrayWithCheckers[2][5] = Cell(2, 5, null)
         comparedArrayWithCheckers[3][4] = Cell(3, 4, Checker(Colors.BLACK, false))
         startField.moveChecker(startField.getCellFromField(2, 5)!!, startField.getCellFromField(3, 4)!!)
         comparedArrayWithCheckers[1][4] = Cell(1, 4, null)
-        comparedArrayWithCheckers[2][4] = Cell(2, 4, null)
+        comparedArrayWithCheckers[2][3] = Cell(2, 3, null)
         comparedArrayWithCheckers[0][5] = Cell(0, 5, Checker(Colors.WHITE, false))
         startField.eatChecker(startField.getCellFromField(1, 4)!!)
-        startField.moveChecker(startField.getCellFromField(2, 4)!!, startField.getCellFromField(0, 5)!!)
+        startField.moveChecker(startField.getCellFromField(2, 3)!!, startField.getCellFromField(0, 5)!!)
         comparedArrayWithCheckers[1][6] = Cell(1, 6, null)
         comparedArrayWithCheckers[2][5] = Cell(2, 5, Checker(Colors.BLACK, false))
         startField.moveChecker(startField.getCellFromField(1, 6)!!, startField.getCellFromField(2, 5)!!)
@@ -160,9 +160,8 @@ class FieldTest {
         comparedArrayWithCheckers[0][5] = Cell(0, 5, null)
         comparedArrayWithCheckers[2][7] = Cell(2, 7, Checker(Colors.WHITE, true))
         startField.moveChecker(startField.getCellFromField(0, 5)!!, startField.getCellFromField(2, 7)!!)
-        val color = startField.getCellFromField(2, 7)!!.getChecker()?.getColorOfChecker()
         startField.eatChecker(startField.getCellFromField(1, 6)!!)
-        startField.changeToQueen(startField.getCellFromField(2, 7)!!, color)
+        startField.changeToQueen(startField.getCellFromField(2, 7)!!)
         assertDeepContentEquals(comparedArrayWithCheckers, startField.checkersField)
 
 
@@ -264,15 +263,73 @@ class FieldTest {
 
     @Test
     fun multiEatSituation() {
+        val startField = Field(listener)
+        startField.field()
+        startField.fillFieldByCheckers()
+        startField.moveChecker(startField.getCellFromField(0, 5)!!, startField.getCellFromField(1, 4)!!)
+        startField.moveChecker(startField.getCellFromField(1, 2)!!, startField.getCellFromField(2, 3)!!)
+        startField.moveChecker(startField.getCellFromField(2, 5)!!, startField.getCellFromField(3, 4)!!)
+        startField.eatChecker(startField.getCellFromField(1, 4)!!)
+        startField.moveChecker(startField.getCellFromField(2, 3)!!, startField.getCellFromField(0, 5)!!)
+        startField.moveChecker(startField.getCellFromField(1, 6)!!, startField.getCellFromField(2, 5)!!)
+        startField.moveChecker(startField.getCellFromField(3, 2)!!, startField.getCellFromField(4, 3)!!)
+        startField.moveChecker(startField.getCellFromField(2, 7)!!, startField.getCellFromField(1, 6)!!)
+        startField.moveChecker(startField.getCellFromField(0, 5)!!, startField.getCellFromField(2, 7)!!)
+        startField.eatChecker(startField.getCellFromField(1, 6)!!)
+        startField.changeToQueen(startField.getCellFromField(2, 7)!!)
+        startField.moveChecker(startField.getCellFromField(6, 5)!!, startField.getCellFromField(7, 4)!!)
+        startField.moveChecker(startField.getCellFromField(0, 1)!!, startField.getCellFromField(1, 2)!!)
+        startField.moveChecker(startField.getCellFromField(4, 5)!!, startField.getCellFromField(5, 4)!!)
+        startField.moveChecker(startField.getCellFromField(2, 7)!!, startField.getCellFromField(4, 5)!!)
+        startField.eatChecker(startField.getCellFromField(3, 6)!!)
+        val cell1 = startField.getCellFromField(2, 3)
+        val cell2 = startField.getCellFromField(6, 3)
+        val cell3 = startField.getCellFromField(6, 7)
+        val cell4 = startField.getCellFromField(2, 7)
+        startField.selectedCell = startField.getCellFromField(4, 5)!!
+        startField.potentialSteps = startField.requiredSteps(false)
+        assertEquals(true, startField.multiEatSituation(cell1, startField.potentialSteps))
+        assertEquals(true, startField.multiEatSituation(cell2, startField.potentialSteps))
+        assertEquals(false, startField.multiEatSituation(cell3, startField.potentialSteps))
+        assertEquals(false, startField.multiEatSituation(cell4, startField.potentialSteps))
+    }
 
+    @Test
+    fun checkForEatMore() {
+        val startField = Field(listener)
+        startField.field()
+        startField.fillFieldByCheckers()
+        startField.moveChecker(startField.getCellFromField(0, 5)!!, startField.getCellFromField(1, 4)!!)
+        startField.moveChecker(startField.getCellFromField(1, 2)!!, startField.getCellFromField(2, 3)!!)
+        startField.moveChecker(startField.getCellFromField(2, 5)!!, startField.getCellFromField(3, 4)!!)
+        startField.eatChecker(startField.getCellFromField(1, 4)!!)
+        startField.moveChecker(startField.getCellFromField(2, 3)!!, startField.getCellFromField(0, 5)!!)
+        startField.moveChecker(startField.getCellFromField(1, 6)!!, startField.getCellFromField(2, 5)!!)
+        startField.moveChecker(startField.getCellFromField(3, 2)!!, startField.getCellFromField(4, 3)!!)
+        startField.moveChecker(startField.getCellFromField(2, 7)!!, startField.getCellFromField(1, 6)!!)
+        startField.moveChecker(startField.getCellFromField(0, 5)!!, startField.getCellFromField(2, 7)!!)
+        startField.eatChecker(startField.getCellFromField(1, 6)!!)
+        startField.changeToQueen(startField.getCellFromField(2, 7)!!)
+        startField.moveChecker(startField.getCellFromField(6, 5)!!, startField.getCellFromField(7, 4)!!)
+        startField.moveChecker(startField.getCellFromField(0, 1)!!, startField.getCellFromField(1, 2)!!)
+        startField.moveChecker(startField.getCellFromField(4, 5)!!, startField.getCellFromField(5, 4)!!)
+        startField.moveChecker(startField.getCellFromField(2, 7)!!, startField.getCellFromField(4, 5)!!)
+        startField.eatChecker(startField.getCellFromField(3, 6)!!)
+        startField.selectedCell = startField.getCellFromField(4, 5)!!
+        startField.potentialSteps = startField.requiredSteps(false)
+        val entry = mutableMapOf<Cell?, MutableList<Cell?>>()
+        entry[startField.selectedCell] = startField.potentialSteps[startField.selectedCell]!!
+        val requiredSteps = mutableMapOf<Cell?, MutableList<Cell?>>()
+        requiredSteps[startField.selectedCell] = mutableListOf(startField.getCellFromField(2, 3), startField.getCellFromField(6, 3))
+        assertEquals(requiredSteps ,startField.checkForEatMore(startField.selectedCell, entry))
     }
 
     private fun assertDeepContentEquals(array1: Array<Array<Cell?>>, array2: Array<Array<Cell?>?>): Boolean {
         var flag = true
-        for (x in array1.indices) {
+        Loop@ for (x in array1.indices) {
             for (y in array1[x].indices) {
-                flag = array1.get(x).get(y) == array2.get(x)?.get(y)
-                if (!flag) break
+                flag = array1[x][y] == array2[x]?.get(y)
+                if (!flag) break@Loop
             }
         }
         return  flag
