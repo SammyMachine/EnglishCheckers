@@ -81,9 +81,10 @@ class FieldTest {
         startField.fillFieldByCheckers()
         comparedArrayWithCheckers[0][5] = Cell(0, 5, null)
         startField.eatChecker(startField.getCellFromField(0, 5)!!)
-        assertDeepContentEquals(comparedArrayWithCheckers, startField.checkersField)
+        assertTrue(assertDeepContentEquals(comparedArrayWithCheckers, startField.checkersField))
         comparedArrayWithCheckers[1][3] = Cell(1, 3, null)
         startField.eatChecker(startField.getCellFromField(1, 3)!!)
+        assertTrue(assertDeepContentEquals(comparedArrayWithCheckers, startField.checkersField))
     }
 
     @Test
@@ -103,15 +104,15 @@ class FieldTest {
         comparedArrayWithCheckers[0][5] = Cell(0, 5, null)
         comparedArrayWithCheckers[1][4] = Cell(1, 4, Checker(Colors.BLACK, false))
         startField.moveChecker(startField.getCellFromField(0, 5)!!, startField.getCellFromField(1, 4)!!)
-        assertDeepContentEquals(comparedArrayWithCheckers, startField.checkersField)
-        comparedArrayWithCheckers[1][3] = Cell(1, 3, null)
-        comparedArrayWithCheckers[2][4] = Cell(2, 4, Checker(Colors.WHITE, false))
-        startField.moveChecker(startField.getCellFromField(1, 3)!!, startField.getCellFromField(2, 4)!!)
-        assertDeepContentEquals(comparedArrayWithCheckers, startField.checkersField)
+        assertTrue(assertDeepContentEquals(comparedArrayWithCheckers, startField.checkersField))
+        comparedArrayWithCheckers[1][2] = Cell(1, 2, null)
+        comparedArrayWithCheckers[2][3] = Cell(2, 3, Checker(Colors.WHITE, false))
+        startField.moveChecker(startField.getCellFromField(1, 2)!!, startField.getCellFromField(2, 3)!!)
+        assertTrue(assertDeepContentEquals(comparedArrayWithCheckers, startField.checkersField))
         comparedArrayWithCheckers[2][5] = Cell(2, 5, null)
         comparedArrayWithCheckers[3][4] = Cell(3, 4, Checker(Colors.BLACK, false))
         startField.moveChecker(startField.getCellFromField(2, 5)!!, startField.getCellFromField(3, 4)!!)
-        assertDeepContentEquals(comparedArrayWithCheckers, startField.checkersField)
+        assertTrue(assertDeepContentEquals(comparedArrayWithCheckers, startField.checkersField))
         comparedArrayWithCheckers[1][4] = Cell(1, 4, null)
         comparedArrayWithCheckers[2][4] = Cell(2, 4, null)
         comparedArrayWithCheckers[0][5] = Cell(0, 5, Checker(Colors.WHITE, false))
@@ -162,7 +163,7 @@ class FieldTest {
         startField.moveChecker(startField.getCellFromField(0, 5)!!, startField.getCellFromField(2, 7)!!)
         startField.eatChecker(startField.getCellFromField(1, 6)!!)
         startField.changeToQueen(startField.getCellFromField(2, 7)!!)
-        assertDeepContentEquals(comparedArrayWithCheckers, startField.checkersField)
+        assertTrue(assertDeepContentEquals(comparedArrayWithCheckers, startField.checkersField))
 
 
     }
@@ -325,13 +326,11 @@ class FieldTest {
     }
 
     private fun assertDeepContentEquals(array1: Array<Array<Cell?>>, array2: Array<Array<Cell?>?>): Boolean {
-        var flag = true
-        Loop@ for (x in array1.indices) {
+        for (x in array1.indices) {
             for (y in array1[x].indices) {
-                flag = array1[x][y] == array2[x]?.get(y)
-                if (!flag) break@Loop
+                if (array1[x][y] != array2[x]?.get(y)) return false
             }
         }
-        return  flag
+        return array1.size == array2.size
     }
 }

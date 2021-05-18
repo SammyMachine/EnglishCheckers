@@ -15,6 +15,7 @@ class Field(listener: ActionListener?) {
     var potentialSteps = mutableMapOf<Cell?, MutableList<Cell?>>()
     private var moveFlag = true //moveFlag: true when BlackPlayer move; false when WhitePlayer move
     private lateinit var viewNow: MutableList<Pair<Int, Int>>
+    private var entry1 = mutableMapOf<Cell?, MutableList<Cell?>>()
 
     fun actionListener(actionListener: ActionListener?) {
         this.actionListener = actionListener
@@ -100,7 +101,46 @@ class Field(listener: ActionListener?) {
 
     fun startGame(x: Int, y: Int): String {
         var outputToOnClick = "nothing"
+        if (clickCounter == 2 && this.getCellFromField(x, y) in entry1[selectedCell]!!) {
+            val cell2 = this.getCellFromField(x, y)
+            if (flagToMove(selectedCell, cell2!!, potentialSteps)) {
+                if (selectedCell in potentialSteps.keys)
+                    if (((selectedCell.getX() - (cell2.getX())) == 2 || (selectedCell.getX() - (cell2.getX())) == -2)
+                        && ((selectedCell.getY() - (cell2.getY())) == 2 || (selectedCell.getY() - (cell2.getY())) == -2)
+                    ) {
+                        val entry = mutableMapOf<Cell?, MutableList<Cell?>>()
+                        entry[selectedCell] = potentialSteps[selectedCell]!!
+                        if (multiEatSituation(cell2, potentialSteps)) {
+                            moveChecker(this.getCellFromField(selectedCell.getX(), selectedCell.getY())!!, cell2)
+                            actionListener?.checkerMoved(selectedCell, cell2)
+                            actionListener?.checkerWasEaten(this.getCellFromField((cell2.getX() + selectedCell.getX()) / 2, (cell2.getY() + selectedCell.getY()) / 2)!!)
+                            eatChecker(this.getCellFromField((cell2.getX() + selectedCell.getX()) / 2, (cell2.getY() + selectedCell.getY()) / 2)!!)
+                            if (this.checkForEatMore(cell2, entry).isNotEmpty()) {
+                                clickCounter = 0
+                                cellCheckedForEat = cell2
+                            } else {
+                                this.changeToQueen(cell2)
+                                clickCounter = 0
+                                moveFlag = !moveFlag
+                            }
+                        } else {
+                            clickCounter = 0
+                            moveFlag = !moveFlag
+                        }
+                    } else {
+                        moveChecker(this.getCellFromField(selectedCell.getX(), selectedCell.getY())!!, cell2)
+                        actionListener?.checkerMoved(selectedCell, cell2)
+                        this.changeToQueen(cell2)
+                        moveFlag = !moveFlag
+                        clickCounter = 0
+                    }
+            }
+            actionListener?.boardClear(potentialSteps, actionListener?.convertCoordinatesToViews(viewNow)!!)
+            chosenCell = cell2
+            actionListener?.viewClearing(actionListener?.convertCoordinatesToViews(viewNow)!!)
+        }
         if (clickCounter == 1) {
+            cellCheckedForEat = Cell(-1, -1, null)
             val cell1 = this.getCellFromField(x, y)
             if (cell1!!.getChecker() != null) {
                 if (cell1.getChecker()?.getColorOfChecker() == selectedCell.getChecker()?.getColorOfChecker())
@@ -153,10 +193,9 @@ class Field(listener: ActionListener?) {
                         if (cell in requiredSteps.keys || cell in possibleSteps.keys)
                             if (requiredSteps.isNotEmpty()) {
                                 if (cell in requiredSteps.keys) {
-                                    if (cell.getChecker()!!.getColorOfChecker() != chosenCell!!.getChecker()!!.getColorOfChecker() || cellCheckedForEat == cell) {
                                         potentialSteps = requiredSteps
                                         for ((key, list) in potentialSteps) {
-                                            if (key == cell || key!!.getChecker()!!.getColorOfChecker() != chosenCell!!.getChecker()!!.getColorOfChecker()) {
+                                            if (key == cell) {
                                                 actionListener?.setColorOfChosenCell(x, y, Colors.POSITION_AT_THE_MOMENT)
                                                 actionListener?.addingToView(actionListener?.getCellLayout(key) as View)
                                                 for (i in list.indices) {
@@ -165,19 +204,18 @@ class Field(listener: ActionListener?) {
                                                 }
                                             }
                                         }
+
+                                }
+                                selectedCell = cell
+                                if (flagToPickNonEater(selectedCell, requiredSteps)) {
+                                    if (chosenCell == cellCheckedForEat ) {
+                                        clickCounter = 2
+                                        entry1[selectedCell] = potentialSteps[selectedCell]!!
                                     }
-                                }
-                                if (cellCheckedForEat == Cell(-1, -1, null)) {
-                                    cellCheckedForEat = cell
-                                    selectedCell = cell
-                                }
-                                if (cell.getChecker()!!.getColorOfChecker() != chosenCell!!.getChecker()!!.getColorOfChecker() || cellCheckedForEat == chosenCell) {
-                                    cellCheckedForEat = cell
-                                    selectedCell = cell
+                                    else clickCounter++
                                 }
 
-                                if (flagToPickNonEater(selectedCell, requiredSteps))
-                                    clickCounter++
+
                             } else if (cell in possibleSteps.keys && cell !in requiredSteps.keys) {
                                 potentialSteps[cell] = possibleSteps[cell]!!
                                 if (cell.getChecker() != null) {
@@ -188,7 +226,6 @@ class Field(listener: ActionListener?) {
                                     actionListener?.setColorOfPotentialCell(potentialSteps[cell]?.get(i)!!.getX(), potentialSteps[cell]?.get(i)!!.getY(), Colors.POSSIBLE_STEP_COLOR)
                                     actionListener?.addingToView(actionListener?.getCellLayout(potentialSteps[cell]?.get(i)!!) as View)
                                 }
-                                cellCheckedForEat = Cell(-1, -1, null)
                                 selectedCell = cell
                                 clickCounter++
                             } else {
