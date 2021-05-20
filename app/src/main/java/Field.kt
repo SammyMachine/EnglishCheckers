@@ -13,7 +13,7 @@ class Field(listener: ActionListener?) {
     private var chosenCell: Cell? = null
     private var clickCounter = 0
     var potentialSteps = mutableMapOf<Cell?, MutableList<Cell?>>()
-    private var moveFlag = true //moveFlag: true when BlackPlayer move; false when WhitePlayer move
+    var moveFlag = true //moveFlag: true when BlackPlayer move; false when WhitePlayer move
     private lateinit var viewNow: MutableList<Pair<Int, Int>>
     private var entry1 = mutableMapOf<Cell?, MutableList<Cell?>>()
 
@@ -439,7 +439,7 @@ class Field(listener: ActionListener?) {
         return flag
     }
 
-    private fun checkForGameFinished(): Pair<Boolean, Boolean> {
+    fun checkForGameFinished(): Pair<Boolean, Boolean> {
         var flag = false
         var flagForColorForWin = false // true = winBlack, false = winWhite
         var counterForBlack = 0

@@ -325,6 +325,31 @@ class FieldTest {
         assertEquals(requiredSteps ,startField.checkForEatMore(startField.selectedCell, entry))
     }
 
+    @Test
+    fun checkForGameFinished() {
+        val startField = Field(listener)
+        startField.field()
+        startField.getCellFromField(2, 5)!!.setChecker(Checker(Colors.BLACK, false))
+        startField.getCellFromField(3, 4)!!.setChecker(Checker(Colors.WHITE, false))
+        startField.moveFlag = true
+        startField.moveChecker(startField.getCellFromField(2,5)!!, startField.getCellFromField(4, 3)!!)
+        startField.eatChecker(startField.getCellFromField(3, 4)!!)
+        assertEquals(Pair(first = true, second = true), startField.checkForGameFinished())
+
+        startField.field()
+        startField.getCellFromField(2, 5)!!.setChecker(Checker(Colors.BLACK, false))
+        startField.getCellFromField(3, 4)!!.setChecker(Checker(Colors.WHITE, false))
+        startField.moveFlag = false
+        startField.moveChecker(startField.getCellFromField(3,4)!!, startField.getCellFromField(1, 6)!!)
+        startField.eatChecker(startField.getCellFromField(2, 5)!!)
+        assertEquals(Pair(first = true, second = false), startField.checkForGameFinished())
+
+        startField.field()
+        startField.getCellFromField(2, 5)!!.setChecker(Checker(Colors.BLACK, false))
+        startField.getCellFromField(3, 4)!!.setChecker(Checker(Colors.WHITE, false))
+        assertEquals(Pair(first = false, second = false), startField.checkForGameFinished())
+    }
+
     private fun assertDeepContentEquals(array1: Array<Array<Cell?>>, array2: Array<Array<Cell?>?>): Boolean {
         for (x in array1.indices) {
             for (y in array1[x].indices) {
